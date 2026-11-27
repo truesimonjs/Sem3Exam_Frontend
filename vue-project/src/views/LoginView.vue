@@ -1,17 +1,35 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import IntroMessage from '../components/IntroMessage.vue'
+import axios from 'axios'
 
 const credentials = reactive({
-  email: '',
+  username: '',
   password: '',
   rememberMe: false,
 })
 
+const isLoading = ref(false)
+
 const loginMessage = ref('')
 
-function submitLogin() {
-  loginMessage.value = 'Log ind er ikke tilgængeligt endnu.'
+async function submitLogin() {
+  isLoading.value = true
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    const data = await axios.post("https://localhost:7235/api/auth/login", credentials);
+    console.log(data.data.token);
+    localStorage.setItem('stromAlertToken', data.data.token);
+    window.location.href = '/';
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      loginMessage.value = 'Ugyldig brugernavn eller adgangskode.'
+    } else {
+      loginMessage.value = 'Der opstod en fejl. Prøv igen senere.'
+    }
+  } finally {
+    isLoading.value = false
+  }
 }
 
 function showPasswordRecoveryMessage() {
@@ -30,15 +48,15 @@ function showPasswordRecoveryMessage() {
           <p class="login-subtitle">Log ind for at se dine strømpriser og indstillinger.</p>
 
           <div class="login-field">
-            <label for="login-email" class="form-label">E-mailadresse</label>
+            <label for="login-username" class="form-label">Brugernavn</label>
             <input
-              id="login-email"
-              v-model="credentials.email"
+              id="login-username"
+              v-model="credentials.username"
               class="form-control"
-              type="email"
-              name="email"
-              placeholder="navn@eksempel.dk"
-              autocomplete="email"
+              type="text"
+              name="username"
+              placeholder="Indtast dit brugernavn"
+              autocomplete="username"
               required
             >
           </div>
@@ -67,7 +85,11 @@ function showPasswordRecoveryMessage() {
             </button>
           </div>
 
-          <button class="btn login-submit" type="submit">Log ind</button>
+          <button v-if="!isLoading" class="btn login-submit" type="submit">Log ind</button>
+          <button v-else class="btn login-submit" type="button" disabled>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Indlæser...
+          </button>
           <p v-if="loginMessage" class="login-message" role="status">{{ loginMessage }}</p>
 
           <p class="signup-prompt">

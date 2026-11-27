@@ -12,7 +12,6 @@ const profileData = {
 }
 
 export async function fetchProfileData() {
-  await new Promise((resolve) => setTimeout(resolve, 1500))
   // Replace this static fixture with the API request when the endpoint is available.
   return {
     profile: { ...profileData.profile },

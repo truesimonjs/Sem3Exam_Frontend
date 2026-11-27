@@ -4,7 +4,6 @@ const todaysPricesFixture = [
 ]
 
 export async function fetchTodaysPrices() {
-  await new Promise((resolve) => setTimeout(resolve, 1500))
   // Replace this fixture with the daily prices API request when available.
   return [...todaysPricesFixture]
 }
